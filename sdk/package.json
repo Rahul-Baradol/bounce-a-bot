@@ -1,0 +1,30 @@
+{
+  "name": "bouncy-bot-sdk",
+  "version": "1.3.0",
+  "type": "module",
+  "module": "dist/bouncy-bot-sdk.es.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/bouncy-bot-sdk.es.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && tsc --emitDeclarationOnly",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.1",
+    "tsup": "^8.5.1",
+    "typescript": "~6.0.2",
+    "vite": "^8.0.12"
+  },
+  "dependencies": {
+    "eventemitter3": "^5.0.4"
+  }
+}
