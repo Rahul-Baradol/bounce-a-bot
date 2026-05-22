@@ -5,6 +5,11 @@ Clone this repository
 git clone https://github.com/Rahul-Baradol/bounce-a-bot.git
 ```
 
+Run
+```
+cd bounce-a-bot
+```
+
 Have docker installed. Please refer the [docs](https://docs.docker.com/desktop/setup/install/windows-install/)
 
 Rename .env.example to .env in frontend and backend folder.
