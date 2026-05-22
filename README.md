@@ -7,7 +7,21 @@ git clone https://github.com/Rahul-Baradol/bounce-a-bot.git
 
 Have docker installed. Please refer the [docs](https://docs.docker.com/desktop/setup/install/windows-install/)
 
-Just run 
+Rename .env.example to .env in frontend and backend folder.
+
+Run the following in frontend folder
+```
+npm install
+npm run build
+```
+
+Run the following in backend folder
+```
+python3 -m venv .venv 
+source .venv/bin/activate
+pip install -r requirements.txt
+
+Then run 
 ```
 docker compose up
 ```
