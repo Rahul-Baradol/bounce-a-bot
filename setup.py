@@ -1,66 +1,45 @@
 import os
 import subprocess
-import sys
 from pathlib import Path
 
-PROJECT_DIR = "bounce-a-bot"
-
-def run(cmd, cwd=None, check=True):
+def run(cmd, cwd=None):
     print(f"\n➜ {cmd}")
-    subprocess.run(cmd, shell=True, cwd=cwd, check=check)
+    subprocess.run(cmd, shell=True, cwd=cwd, check=True)
 
-def file_copy(src, dst):
-    src_path = Path(src)
-    dst_path = Path(dst)
-
-    if src_path.exists():
-        dst_path.write_text(src_path.read_text())
-        print(f"✔ Created {dst}")
+def copy_env(src, dst):
+    src, dst = Path(src), Path(dst)
+    if src.exists():
+        dst.write_text(src.read_text())
+        print(f"✔ {dst} created")
     else:
-        print(f"⚠ Missing {src}, skipping")
+        print(f"⚠ {src} not found")
 
 def main():
-    project_path = Path(PROJECT_DIR)
+    repo_root = Path.cwd()
 
-    if not project_path.exists():
-        print("❌ bounce-a-bot folder not found")
-        sys.exit(1)
-
-    print("➡ Entering project directory")
-
-    # Check docker
+    print("➡ Checking Docker...")
     if os.system("docker --version > /dev/null 2>&1") != 0:
-        print("❌ Docker not installed")
-        sys.exit(1)
+        raise SystemExit("Docker not installed")
 
-    # Move to project
-    os.chdir(project_path)
+    print("➡ Setting up env files...")
+    copy_env("frontend/.env.example", "frontend/.env")
+    copy_env("backend/.env.example", "backend/.env")
 
-    print("\n➡ Copying .env files")
-    file_copy("frontend/.env.example", "frontend/.env")
-    file_copy("backend/.env.example", "backend/.env")
-
-    print("\n➡ Frontend setup")
+    print("➡ Frontend install + build...")
     run("npm install", cwd="frontend")
     run("npm run build", cwd="frontend")
 
-    print("\n➡ Backend setup")
-
-    venv_path = Path("backend/.venv")
-
+    print("➡ Backend setup...")
     run("python3 -m venv .venv", cwd="backend")
 
-    activate = venv_path / "bin" / "activate"
+    activate = repo_root / "backend" / ".venv" / "bin" / "activate"
 
-    pip_install = (
-        f"source {activate} && "
-        "pip install --upgrade pip && "
-        "pip install -r requirements.txt"
+    run(
+        f"bash -c 'source {activate} && pip install --upgrade pip && pip install -r requirements.txt'",
+        cwd="backend"
     )
 
-    run(pip_install, cwd="backend")
-
-    print("\n✅ Setup complete!")
+    print("\n✅ Done")
 
 if __name__ == "__main__":
     main()
