@@ -20,6 +20,7 @@ Run the following in backend folder
 python3 -m venv .venv 
 source .venv/bin/activate
 pip install -r requirements.txt
+```
 
 Then run 
 ```
