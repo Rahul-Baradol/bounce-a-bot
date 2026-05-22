@@ -1,3 +1,4 @@
+from my_types import EventType
 AVAILABLE_MODELS = {
     "gpt-4.1": {
         "id": "gpt-4.1",
@@ -15,3 +16,10 @@ AVAILABLE_MODELS = {
         "provider": "google"
     }
 }
+
+valid_event_types = [
+    EventType.CONVERSATION_CREATED,
+    EventType.MESSAGE_CREATED,
+    EventType.MESSAGE_COMPLETED,
+    EventType.USER_IDENTIFIED
+]

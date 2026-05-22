@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from repos.conversation import conversations_collection
+from repos.collections import conversations_collection
 from constants import AVAILABLE_MODELS
 from fastapi import APIRouter
 

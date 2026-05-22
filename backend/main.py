@@ -4,6 +4,7 @@ from routes.auth import router as auth_router
 from routes.conversations import router as conversations_router
 from routes.ingest import router as ingest_router
 from routes.prompt import router as prompt_router
+from routes.analytics import router as analytics_router
 
 app = FastAPI(title="Mock LLM Backend")
 
@@ -19,6 +20,7 @@ app.include_router(auth_router)
 app.include_router(conversations_router)
 app.include_router(ingest_router)
 app.include_router(prompt_router)
+app.include_router(analytics_router)
 
 @app.get("/")
 async def root():

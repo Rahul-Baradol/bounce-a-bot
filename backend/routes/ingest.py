@@ -7,7 +7,7 @@ router = APIRouter()
 
 @router.post("/ingest")
 async def ingest(req: IngestEventRequest):
-    event = {
+    event = {  
         "event": req.event,
         "timestamp": datetime.utcnow().isoformat(),
         "payload": req.payload

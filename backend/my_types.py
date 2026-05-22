@@ -3,7 +3,7 @@ from enum import Enum
 import os
 from pydantic import BaseModel
 
-EVENT_MODE = os.getenv("EVENT_MODE", "local")
+EVENT_MODE = os.getenv("EVENT_MODE", "mongo")
 
 class PromptRequest(BaseModel):
     model_id: str
@@ -15,6 +15,7 @@ class EventType(str, Enum):
     CONVERSATION_CREATED = "conversation.created"
     MESSAGE_CREATED = "message.created"
     MESSAGE_COMPLETED = "message.completed"
+    USER_IDENTIFIED = "user.identified"
 
 class IngestEventRequest(BaseModel):
     event: EventType
