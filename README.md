@@ -163,7 +163,7 @@ Tradeoffs
     * orchestration systems
     * CQRS/event sourcing
     * complicated auth providers
-  * Good tradeoff for MVP stage.
+  * Done for MVP stage.
   * Complexity introduced only when scale demands it.
 
 * **Scalability assumptions are explicit**
