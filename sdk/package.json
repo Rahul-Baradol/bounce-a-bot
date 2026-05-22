@@ -1,6 +1,6 @@
 {
   "name": "bouncy-bot-sdk",
-  "version": "2.0.2",
+  "version": "2.2.0",
   "type": "module",
   "module": "dist/bouncy-bot-sdk.es.js",
   "types": "./dist/index.d.ts",
