@@ -7,6 +7,7 @@ git clone https://github.com/Rahul-Baradol/bounce-a-bot.git
 
 Run
 ```
+cd bounce-a-bot
 python3 setup.py
 ```
 
