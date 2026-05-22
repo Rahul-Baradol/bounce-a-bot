@@ -12,7 +12,7 @@ type Message = {
 };
 
 const sdk = new SDK({
-  apiBaseUrl: "http://localhost:8001",
+  apiBaseUrl: import.meta.env.VITE_BACKEND_URL,
 });
 
 export function useSDKHook() {
