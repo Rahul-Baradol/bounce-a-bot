@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useSDKHook } from "../hooks/sdk";
 
 export default function Hope() {
@@ -22,7 +22,7 @@ export default function Hope() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Helper to handle conversation switching on mobile (closes the menu)
-  const handleSelectConversation = (id) => {
+  const handleSelectConversation = (id: string) => {
     openConversation(id);
     setIsSidebarOpen(false);
   };
