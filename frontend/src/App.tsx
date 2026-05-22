@@ -1,239 +1,21 @@
-import { useEffect, useRef, useState } from "react";
-
-type Conversation = {
-  id: string;
-  title: string;
-};
-
-type Message = {
-  recipient: "user" | "bot";
-  message: string;
-};
-
-const API_BASE = "http://localhost:8001";
-
-const MODELS = [
-  "gpt-4.1",
-  "claude-sonnet",
-  "gemini-pro",
-];
+import { useSDKHook } from "./hooks/sdk";
 
 export default function App() {
-  const [tempUserId, setTempUserId] = useState<string | null>(null);
-
-  const [conversations, setConversations] = useState<Conversation[]>([]);
-
-  const [conversationId, setConversationId] = useState<string | null>(null);
-
-  const [messages, setMessages] = useState<Message[]>([]);
-
-  const [prompt, setPrompt] = useState("");
-
-  const [selectedModel, setSelectedModel] = useState("gpt-4.1");
-
-  const [loading, setLoading] = useState(false);
-
-  const abortControllerRef = useRef<AbortController | null>(null);
-
-  // -------------------------------------------------------------
-  // Bootstrap temp user
-  // -------------------------------------------------------------
-
-  useEffect(() => {
-    bootstrap();
-  }, []);
-
-  async function bootstrap() {
-    let existing = localStorage.getItem("temp_user_id");
-
-    if (!existing) {
-      const res = await fetch(`${API_BASE}/identify`, {
-        method: "POST",
-      });
-
-      const data = await res.json();
-
-      existing = data.temp_user_id;
-
-      localStorage.setItem("temp_user_id", existing);
-    }
-
-    setTempUserId(existing);
-
-    await loadConversations(existing);
-  }
-
-  // -------------------------------------------------------------
-  // Load conversations
-  // -------------------------------------------------------------
-
-  async function loadConversations(userId: string) {
-    const res = await fetch(
-      `${API_BASE}/list-conversations/${userId}`
-    );
-
-    const data = await res.json();
-
-    setConversations(data);
-  }
-
-  // -------------------------------------------------------------
-  // Open conversation
-  // -------------------------------------------------------------
-
-  async function openConversation(id: string) {
-    const res = await fetch(
-      `${API_BASE}/conversation/${id}`
-    );
-
-    const data = await res.json();
-
-    setConversationId(id);
-    setMessages(data);
-  }
-
-  // -------------------------------------------------------------
-  // Send prompt
-  // -------------------------------------------------------------
-
-  async function sendPrompt() {
-    if (!prompt.trim()) return;
-
-    if (!tempUserId) return;
-
-    setLoading(true);
-
-    const userMessage: Message = {
-      recipient: "user",
-      message: prompt,
-    };
-
-    setMessages((prev) => [...prev, userMessage]);
-
-    const currentPrompt = prompt;
-
-    setPrompt("");
-
-    const controller = new AbortController();
-
-    abortControllerRef.current = controller;
-
-    const res = await fetch(`${API_BASE}/prompt`, {
-      method: "POST",
-      signal: controller.signal,
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model_id: selectedModel,
-        prompt: currentPrompt,
-        temp_user_id: tempUserId,
-        conversation_id: conversationId,
-      }),
-    });
-
-    const reader = res.body?.getReader();
-
-    if (!reader) {
-      setLoading(false);
-      return;
-    }
-
-    const decoder = new TextDecoder();
-
-    let assistantMessage = "";
-
-    setMessages((prev) => [
-      ...prev,
-      {
-        recipient: "bot",
-        message: "",
-      },
-    ]);
-
-    while (true) {
-      const { done, value } = await reader.read();
-
-      if (done) break;
-
-      const chunk = decoder.decode(value);
-
-      const events = chunk
-        .split("\n\n")
-        .filter(Boolean);
-
-      for (const eventBlock of events) {
-        const lines = eventBlock.split("\n");
-
-        let eventType = "";
-        let dataLine = "";
-
-        for (const line of lines) {
-          if (line.startsWith("event:")) {
-            eventType = line.replace("event:", "").trim();
-          }
-
-          if (line.startsWith("data:")) {
-            dataLine = line.replace("data:", "").trim();
-          }
-        }
-
-        if (!dataLine) continue;
-
-        const parsed = JSON.parse(dataLine);
-
-        // ---------------------------------------------
-        // conversation.created
-        // ---------------------------------------------
-
-        if (eventType === "conversation.created") {
-          setConversationId(parsed.conversation_id);
-
-          await loadConversations(tempUserId);
-        }
-
-        // ---------------------------------------------
-        // message.delta
-        // ---------------------------------------------
-
-        if (eventType === "message.delta") {
-          assistantMessage += parsed.token;
-
-          setMessages((prev) => {
-            const copy = [...prev];
-
-            copy[copy.length - 1] = {
-              recipient: "bot",
-              message: assistantMessage,
-            };
-
-            return copy;
-          });
-        }
-      }
-    }
-
-    setLoading(false);
-  }
-
-  // -------------------------------------------------------------
-  // Cancel stream
-  // -------------------------------------------------------------
-
-  function cancelGeneration() {
-    abortControllerRef.current?.abort();
-
-    setLoading(false);
-  }
-
-  // -------------------------------------------------------------
-  // New chat
-  // -------------------------------------------------------------
-
-  function newChat() {
-    setConversationId(null);
-    setMessages([]);
-  }
+  const { 
+    conversations,
+    openConversation,
+    newChat,
+    messages,
+    prompt,
+    setPrompt,
+    sendPrompt,
+    loading,
+    cancelGeneration,
+    selectedModel,
+    setSelectedModel,
+    models,
+    conversationId
+  } = useSDKHook();
 
   return (
     <div
@@ -268,7 +50,9 @@ export default function App() {
           {conversations.map((conv) => (
             <div
               key={conv.id}
-              onClick={() => openConversation(conv.id)}
+              onClick={() =>
+                openConversation(conv.id)
+              }
               style={{
                 padding: 12,
                 border: "1px solid #eee",
@@ -308,15 +92,19 @@ export default function App() {
               setSelectedModel(e.target.value)
             }
           >
-            {MODELS.map((model) => (
-              <option key={model} value={model}>
-                {model}
+            {models.map((model) => (
+              <option
+                key={model.id}
+                value={model.id}
+              >
+                {model.name}
               </option>
             ))}
           </select>
 
           <div>
-            Conversation: {conversationId || "new"}
+            Conversation:{" "}
+            {conversationId || "new"}
           </div>
         </div>
 
@@ -390,7 +178,9 @@ export default function App() {
                 Send
               </button>
             ) : (
-              <button onClick={cancelGeneration}>
+              <button
+                onClick={cancelGeneration}
+              >
                 Stop
               </button>
             )}
