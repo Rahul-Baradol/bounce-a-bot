@@ -64,7 +64,7 @@ function formatDate(date: string) {
 
 function formatLatency(ms: number) {
   if (!ms) return "0ms";
-  if (ms < 1000) return `${ms}ms`;
+  if (ms < 1000) return `${ms.toFixed(2)}ms`;
   return `${(ms / 1000).toFixed(2)}s`;
 }
 
