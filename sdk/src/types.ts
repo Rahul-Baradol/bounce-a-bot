@@ -1,7 +1,7 @@
 export type PromptRequest = {
   modelId: string;
   prompt: string;
-  conversationId?: string | null;
+  conversationId: string | null;
 };
 
 export type Conversation = {
